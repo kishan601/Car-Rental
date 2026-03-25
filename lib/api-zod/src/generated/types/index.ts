@@ -12,6 +12,7 @@ export * from "./bookingInput";
 export * from "./bookingWithDetails";
 export * from "./car";
 export * from "./carInput";
+export * from "./customerBooking";
 export * from "./errorResponse";
 export * from "./healthStatus";
 export * from "./loginInput";

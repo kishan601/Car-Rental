@@ -9,6 +9,7 @@ import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
 import AgencyDashboardPage from "@/pages/agency/dashboard";
 import AgencyBookingsPage from "@/pages/agency/bookings";
+import MyBookingsPage from "@/pages/customer/my-bookings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/register" component={() => <RegisterPage defaultTab="customer" />} />
       <Route path="/register/customer" component={() => <RegisterPage defaultTab="customer" />} />
       <Route path="/register/agency" component={() => <RegisterPage defaultTab="agency" />} />
+      <Route path="/my-bookings" component={MyBookingsPage} />
       <Route path="/agency/dashboard" component={AgencyDashboardPage} />
       <Route path="/agency/bookings" component={AgencyBookingsPage} />
       <Route component={NotFound} />

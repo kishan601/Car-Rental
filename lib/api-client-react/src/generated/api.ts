@@ -23,6 +23,7 @@ import type {
   BookingWithDetails,
   Car,
   CarInput,
+  CustomerBooking,
   ErrorResponse,
   HealthStatus,
   LoginInput,
@@ -841,6 +842,165 @@ export const useCreateBooking = <
 > => {
   return useMutation(getCreateBookingMutationOptions(options));
 };
+
+/**
+ * @summary Cancel a booking (customer only, own bookings)
+ */
+export const getCancelBookingUrl = (id: number) => {
+  return `/api/bookings/${id}`;
+};
+
+export const cancelBooking = async (
+  id: number,
+  options?: RequestInit,
+): Promise<SuccessResponse> => {
+  return customFetch<SuccessResponse>(getCancelBookingUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getCancelBookingMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof cancelBooking>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof cancelBooking>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["cancelBooking"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof cancelBooking>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return cancelBooking(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CancelBookingMutationResult = NonNullable<
+  Awaited<ReturnType<typeof cancelBooking>>
+>;
+
+export type CancelBookingMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Cancel a booking (customer only, own bookings)
+ */
+export const useCancelBooking = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof cancelBooking>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof cancelBooking>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getCancelBookingMutationOptions(options));
+};
+
+/**
+ * @summary Get logged-in customer's own bookings with car details
+ */
+export const getGetMyBookingsUrl = () => {
+  return `/api/customer/bookings`;
+};
+
+export const getMyBookings = async (
+  options?: RequestInit,
+): Promise<CustomerBooking[]> => {
+  return customFetch<CustomerBooking[]>(getGetMyBookingsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMyBookingsQueryKey = () => {
+  return [`/api/customer/bookings`] as const;
+};
+
+export const getGetMyBookingsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMyBookings>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMyBookings>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMyBookingsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyBookings>>> = ({
+    signal,
+  }) => getMyBookings({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMyBookings>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMyBookingsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMyBookings>>
+>;
+export type GetMyBookingsQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get logged-in customer's own bookings with car details
+ */
+
+export function useGetMyBookings<
+  TData = Awaited<ReturnType<typeof getMyBookings>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMyBookings>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMyBookingsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary Get cars added by the logged-in agency

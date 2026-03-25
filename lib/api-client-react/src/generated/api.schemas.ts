@@ -107,6 +107,20 @@ export interface BookingInput {
   numberOfDays: number;
 }
 
+export interface CustomerBooking {
+  id: number;
+  carId: number;
+  vehicleModel: string;
+  vehicleNumber: string;
+  seatingCapacity: number;
+  rentPerDay: number;
+  agencyName: string;
+  startDate: string;
+  numberOfDays: number;
+  totalCost: number;
+  createdAt: string;
+}
+
 export interface BookingWithDetails {
   id: number;
   carId: number;

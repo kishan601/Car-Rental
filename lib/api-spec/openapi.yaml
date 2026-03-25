@@ -266,6 +266,70 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /bookings/{id}:
+    delete:
+      operationId: cancelBooking
+      tags: [bookings]
+      summary: Cancel a booking (customer only, own bookings)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Booking cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /customer/bookings:
+    get:
+      operationId: getMyBookings
+      tags: [bookings]
+      summary: Get logged-in customer's own bookings with car details
+      responses:
+        "200":
+          description: Customer's bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CustomerBooking"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /agency/cars:
     get:
       operationId: getAgencyCars
@@ -520,6 +584,44 @@ components:
         - carId
         - startDate
         - numberOfDays
+
+    CustomerBooking:
+      type: object
+      properties:
+        id:
+          type: integer
+        carId:
+          type: integer
+        vehicleModel:
+          type: string
+        vehicleNumber:
+          type: string
+        seatingCapacity:
+          type: integer
+        rentPerDay:
+          type: number
+        agencyName:
+          type: string
+        startDate:
+          type: string
+        numberOfDays:
+          type: integer
+        totalCost:
+          type: number
+        createdAt:
+          type: string
+      required:
+        - id
+        - carId
+        - vehicleModel
+        - vehicleNumber
+        - seatingCapacity
+        - rentPerDay
+        - agencyName
+        - startDate
+        - numberOfDays
+        - totalCost
+        - createdAt
 
     BookingWithDetails:
       type: object

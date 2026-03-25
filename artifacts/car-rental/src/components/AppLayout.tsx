@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useGetMe, useLogout, getGetMeQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Car as CarIcon, LogOut, LayoutDashboard, CalendarDays } from "lucide-react";
+import { Car as CarIcon, LogOut, LayoutDashboard, CalendarDays, Ticket } from "lucide-react";
 import { motion } from "framer-motion";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -50,12 +50,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             
             {!isLoading && user?.role === 'customer' && (
               <>
+                <Button variant="ghost" asChild className="text-muted-foreground hover:text-foreground hover-elevate hidden sm:inline-flex">
+                  <Link href="/cars">
+                    <CarIcon className="h-4 w-4 mr-2" /> Browse Cars
+                  </Link>
+                </Button>
                 <Button variant="ghost" asChild className="text-muted-foreground hover:text-foreground hover-elevate">
-                  <Link href="/cars">Available Cars</Link>
+                  <Link href="/my-bookings">
+                    <Ticket className="h-4 w-4 mr-2" /> My Bookings
+                  </Link>
                 </Button>
                 <div className="h-6 w-px bg-border/50 mx-2 hidden sm:block"></div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium hidden sm:block text-slate-600">Hello, {user.name}</span>
+                  <span className="text-sm font-medium hidden sm:block text-slate-600">Hi, {user.name.split(" ")[0]}</span>
                   <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout" className="hover:bg-destructive/10 hover:text-destructive rounded-xl transition-colors">
                     <LogOut className="h-4 w-4" />
                   </Button>

@@ -162,6 +162,35 @@ export const CreateBookingBody = zod.object({
 });
 
 /**
+ * @summary Cancel a booking (customer only, own bookings)
+ */
+export const CancelBookingParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const CancelBookingResponse = zod.object({
+  message: zod.string(),
+});
+
+/**
+ * @summary Get logged-in customer's own bookings with car details
+ */
+export const GetMyBookingsResponseItem = zod.object({
+  id: zod.number(),
+  carId: zod.number(),
+  vehicleModel: zod.string(),
+  vehicleNumber: zod.string(),
+  seatingCapacity: zod.number(),
+  rentPerDay: zod.number(),
+  agencyName: zod.string(),
+  startDate: zod.string(),
+  numberOfDays: zod.number(),
+  totalCost: zod.number(),
+  createdAt: zod.string(),
+});
+export const GetMyBookingsResponse = zod.array(GetMyBookingsResponseItem);
+
+/**
  * @summary Get cars added by the logged-in agency
  */
 export const GetAgencyCarsResponseItem = zod.object({

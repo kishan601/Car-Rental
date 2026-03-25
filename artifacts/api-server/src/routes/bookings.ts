@@ -43,4 +43,28 @@ router.post("/", (req: Request, res: Response) => {
   res.status(201).json(booking);
 });
 
+router.delete("/:id", (req: Request, res: Response) => {
+  const user = getSessionUser(req);
+  if (!user) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
+  if (user.role !== "customer") {
+    res.status(403).json({ error: "Only customers can cancel bookings" });
+    return;
+  }
+  const bookingId = parseInt(req.params.id, 10);
+  const bookingIndex = mockBookings.findIndex((b) => b.id === bookingId);
+  if (bookingIndex === -1) {
+    res.status(404).json({ error: "Booking not found" });
+    return;
+  }
+  if (mockBookings[bookingIndex].customerId !== user.id) {
+    res.status(403).json({ error: "You can only cancel your own bookings" });
+    return;
+  }
+  mockBookings.splice(bookingIndex, 1);
+  res.json({ message: "Booking cancelled successfully" });
+});
+
 export default router;
