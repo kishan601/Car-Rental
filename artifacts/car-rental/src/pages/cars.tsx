@@ -158,7 +158,7 @@ export default function CarsPage() {
             initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }} 
             transition={{ delay: 0.1, duration: 0.5 }}
-            className="text-4xl sm:text-5xl lg:text-7xl font-display font-bold leading-[1.1] mb-6 drop-shadow-md"
+            className="text-4xl sm:text-5xl lg:text-7xl font-display font-bold leading-[1.1] mb-6 drop-shadow-md text-[#1649ba]"
           >
             Find Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">Perfect Drive.</span>
           </motion.h1>
@@ -182,14 +182,12 @@ export default function CarsPage() {
           )}
         </div>
       </div>
-
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4">
         <div>
           <h2 className="text-3xl font-display font-bold text-foreground">Available Vehicles</h2>
           <p className="text-muted-foreground mt-2 text-lg">Choose from our wide variety of reliable cars.</p>
         </div>
       </div>
-
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {[1,2,3,4,5,6].map(i => (
