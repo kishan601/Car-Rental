@@ -1,0 +1,15 @@
+packages:
+  "framer-motion": "Smooth animations and micro-interactions for premium feel"
+  "date-fns": "For elegant date formatting in the bookings table"
+  "@hookform/resolvers": "Zod schema validation for react-hook-form"
+  "react-hook-form": "Form state management"
+  "zod": "Type-safe schema validation"
+
+images:
+  - path: "artifacts/car-rental/public/images/hero-bg.png"
+    description: "Abstract gradient mesh background in deep indigo and slate with soft light leaks, modern professional corporate style, luxury automotive feel"
+    aspect_ratio: "16:9"
+
+notes:
+  - Using generated React Query hooks from @workspace/api-client-react
+  - Wouter router base path is configured in App.tsx
