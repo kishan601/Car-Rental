@@ -6,8 +6,7 @@ import NotFound from "@/pages/not-found";
 
 import CarsPage from "@/pages/cars";
 import LoginPage from "@/pages/login";
-import RegisterCustomerPage from "@/pages/register-customer";
-import RegisterAgencyPage from "@/pages/register-agency";
+import RegisterPage from "@/pages/register";
 import AgencyDashboardPage from "@/pages/agency/dashboard";
 import AgencyBookingsPage from "@/pages/agency/bookings";
 
@@ -26,8 +25,9 @@ function Router() {
       <Route path="/" component={() => <Redirect to="/cars" />} />
       <Route path="/cars" component={CarsPage} />
       <Route path="/login" component={LoginPage} />
-      <Route path="/register/customer" component={RegisterCustomerPage} />
-      <Route path="/register/agency" component={RegisterAgencyPage} />
+      <Route path="/register" component={() => <RegisterPage defaultTab="customer" />} />
+      <Route path="/register/customer" component={() => <RegisterPage defaultTab="customer" />} />
+      <Route path="/register/agency" component={() => <RegisterPage defaultTab="agency" />} />
       <Route path="/agency/dashboard" component={AgencyDashboardPage} />
       <Route path="/agency/bookings" component={AgencyBookingsPage} />
       <Route component={NotFound} />

@@ -99,7 +99,7 @@ function CarCard({ car, user }: { car: Car, user: any }) {
                       <SelectTrigger className="h-11 text-sm bg-secondary/30 rounded-xl focus-visible:ring-primary/20">
                         <SelectValue placeholder="Days" />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl">
+                      <SelectContent className="rounded-xl max-h-48 overflow-y-auto">
                         {Array.from({length: 30}, (_, i) => (
                           <SelectItem key={i+1} value={String(i+1)} className="rounded-lg">{i+1} {i === 0 ? 'Day' : 'Days'}</SelectItem>
                         ))}
