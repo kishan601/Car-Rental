@@ -9,7 +9,7 @@ services:
       pnpm install --frozen-lockfile &&
       pnpm --filter @workspace/car-rental run build &&
       pnpm --filter @workspace/api-server run build
-    startCommand: node artifacts/api-server/dist/index.mjs
+    startCommand: "cd artifacts/api-server && node --enable-source-maps ./dist/index.mjs"
     envVars:
       - key: NODE_ENV
         value: production
@@ -17,5 +17,3 @@ services:
         sync: false
       - key: SESSION_SECRET
         generateValue: true
-      - key: PORT
-        value: 10000
