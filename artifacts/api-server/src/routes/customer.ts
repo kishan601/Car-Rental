@@ -1,44 +1,61 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { mockUsers, mockCars, mockBookings } from "./mock-data.js";
+import { db, carsTable, bookingsTable, usersTable } from "@workspace/db";
+import { eq, sql, desc } from "drizzle-orm";
 
 const router: IRouter = Router();
 
-function getSessionUser(req: Request) {
+async function getSessionUser(req: Request) {
   const userId = (req.session as any)?.userId;
   if (!userId) return null;
-  return mockUsers.find((u) => u.id === userId) ?? null;
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+  return user ?? null;
 }
 
-router.get("/bookings", (req: Request, res: Response) => {
-  const user = getSessionUser(req);
-  if (!user) {
-    res.status(401).json({ error: "Not authenticated" });
-    return;
+router.get("/bookings", async (req: Request, res: Response) => {
+  try {
+    const user = await getSessionUser(req);
+    if (!user) {
+      res.status(401).json({ error: "Not authenticated" });
+      return;
+    }
+    if (user.role !== "customer") {
+      res.status(403).json({ error: "Customer access only" });
+      return;
+    }
+
+    const agencyAlias = usersTable;
+
+    const rows = await db
+      .select({
+        id: bookingsTable.id,
+        carId: bookingsTable.carId,
+        vehicleModel: carsTable.vehicleModel,
+        vehicleNumber: carsTable.vehicleNumber,
+        seatingCapacity: carsTable.seatingCapacity,
+        rentPerDay: carsTable.rentPerDay,
+        agencyName: sql<string>`COALESCE(${agencyAlias.agencyName}, ${agencyAlias.name})`,
+        startDate: bookingsTable.startDate,
+        numberOfDays: bookingsTable.numberOfDays,
+        totalCost: bookingsTable.totalCost,
+        createdAt: bookingsTable.createdAt,
+      })
+      .from(bookingsTable)
+      .innerJoin(carsTable, eq(bookingsTable.carId, carsTable.id))
+      .innerJoin(agencyAlias, eq(carsTable.agencyId, agencyAlias.id))
+      .where(eq(bookingsTable.customerId, user.id))
+      .orderBy(desc(bookingsTable.createdAt));
+
+    res.json(
+      rows.map((r) => ({
+        ...r,
+        rentPerDay: Number(r.rentPerDay),
+        totalCost: Number(r.totalCost),
+        createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt,
+      }))
+    );
+  } catch {
+    res.status(500).json({ error: "Internal server error" });
   }
-  if (user.role !== "customer") {
-    res.status(403).json({ error: "Customer access only" });
-    return;
-  }
-  const myBookings = mockBookings
-    .filter((b) => b.customerId === user.id)
-    .map((b) => {
-      const car = mockCars.find((c) => c.id === b.carId);
-      return {
-        id: b.id,
-        carId: b.carId,
-        vehicleModel: car?.vehicleModel ?? "",
-        vehicleNumber: car?.vehicleNumber ?? "",
-        seatingCapacity: car?.seatingCapacity ?? 0,
-        rentPerDay: car?.rentPerDay ?? 0,
-        agencyName: car?.agencyName ?? "",
-        startDate: b.startDate,
-        numberOfDays: b.numberOfDays,
-        totalCost: b.totalCost,
-        createdAt: b.createdAt,
-      };
-    })
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  res.json(myBookings);
 });
 
 export default router;

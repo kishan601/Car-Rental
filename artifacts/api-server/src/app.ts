@@ -2,6 +2,8 @@ import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import session from "express-session";
+import path from "path";
+import { fileURLToPath } from "url";
 import router from "./routes/index.js";
 import { logger } from "./lib/logger.js";
 
@@ -37,6 +39,8 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const isProduction = process.env.NODE_ENV === "production";
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "car-rental-dev-secret-2024",
@@ -44,12 +48,21 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false,
+      secure: isProduction,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   }),
 );
 
 app.use("/api", router);
+
+if (isProduction) {
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const frontendDist = path.join(__dirname, "../../car-rental/dist");
+  app.use(express.static(frontendDist));
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(frontendDist, "index.html"));
+  });
+}
 
 export default app;

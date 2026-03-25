@@ -1,51 +1,76 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { mockUsers, mockCars, mockBookings } from "./mock-data.js";
+import { db, carsTable, bookingsTable, usersTable } from "@workspace/db";
+import { eq, sql } from "drizzle-orm";
 
 const router: IRouter = Router();
 
-function getSessionUser(req: Request) {
+async function getSessionUser(req: Request) {
   const userId = (req.session as any)?.userId;
   if (!userId) return null;
-  return mockUsers.find((u) => u.id === userId) ?? null;
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+  return user ?? null;
 }
 
-router.get("/cars", (req: Request, res: Response) => {
-  const user = getSessionUser(req);
-  if (!user || user.role !== "agency") {
-    res.status(403).json({ error: "Agency access only" });
-    return;
+router.get("/cars", async (req: Request, res: Response) => {
+  try {
+    const user = await getSessionUser(req);
+    if (!user || user.role !== "agency") {
+      res.status(403).json({ error: "Agency access only" });
+      return;
+    }
+    const cars = await db.select().from(carsTable).where(eq(carsTable.agencyId, user.id));
+    res.json(
+      cars.map((c) => ({
+        ...c,
+        rentPerDay: Number(c.rentPerDay),
+        agencyName: user.agencyName ?? user.name,
+        createdAt: c.createdAt instanceof Date ? c.createdAt.toISOString() : c.createdAt,
+      }))
+    );
+  } catch {
+    res.status(500).json({ error: "Internal server error" });
   }
-  const agencyCars = mockCars.filter((c) => c.agencyId === user.id);
-  res.json(agencyCars);
 });
 
-router.get("/bookings", (req: Request, res: Response) => {
-  const user = getSessionUser(req);
-  if (!user || user.role !== "agency") {
-    res.status(403).json({ error: "Agency access only" });
-    return;
+router.get("/bookings", async (req: Request, res: Response) => {
+  try {
+    const user = await getSessionUser(req);
+    if (!user || user.role !== "agency") {
+      res.status(403).json({ error: "Agency access only" });
+      return;
+    }
+
+    const customerAlias = usersTable;
+
+    const rows = await db
+      .select({
+        id: bookingsTable.id,
+        carId: bookingsTable.carId,
+        vehicleModel: carsTable.vehicleModel,
+        vehicleNumber: carsTable.vehicleNumber,
+        customerName: sql<string>`${customerAlias.name}`,
+        customerEmail: sql<string>`${customerAlias.email}`,
+        customerPhone: sql<string | null>`${customerAlias.phone}`,
+        startDate: bookingsTable.startDate,
+        numberOfDays: bookingsTable.numberOfDays,
+        totalCost: bookingsTable.totalCost,
+        createdAt: bookingsTable.createdAt,
+      })
+      .from(bookingsTable)
+      .innerJoin(carsTable, eq(bookingsTable.carId, carsTable.id))
+      .innerJoin(customerAlias, eq(bookingsTable.customerId, customerAlias.id))
+      .where(eq(carsTable.agencyId, user.id));
+
+    res.json(
+      rows.map((r) => ({
+        ...r,
+        totalCost: Number(r.totalCost),
+        createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt,
+      }))
+    );
+  } catch {
+    res.status(500).json({ error: "Internal server error" });
   }
-  const agencyCarIds = mockCars.filter((c) => c.agencyId === user.id).map((c) => c.id);
-  const agencyBookings = mockBookings
-    .filter((b) => agencyCarIds.includes(b.carId))
-    .map((b) => {
-      const car = mockCars.find((c) => c.id === b.carId);
-      const customer = mockUsers.find((u) => u.id === b.customerId);
-      return {
-        id: b.id,
-        carId: b.carId,
-        vehicleModel: car?.vehicleModel ?? "",
-        vehicleNumber: car?.vehicleNumber ?? "",
-        customerName: customer?.name ?? "",
-        customerEmail: customer?.email ?? "",
-        customerPhone: customer?.phone ?? null,
-        startDate: b.startDate,
-        numberOfDays: b.numberOfDays,
-        totalCost: b.totalCost,
-        createdAt: b.createdAt,
-      };
-    });
-  res.json(agencyBookings);
 });
 
 export default router;
