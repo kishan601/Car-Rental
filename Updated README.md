@@ -54,7 +54,7 @@ It has two types of users:
 
 ```bash
 # Clone this masterpiece
-git clone <your-repo-url>
+git clone https://github.com/kishan601/Car-Rental.git
 
 # Install 47,000 node_modules that take up more space than your operating system
 pnpm install
