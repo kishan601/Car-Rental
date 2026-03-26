@@ -1,8 +1,0 @@
-uploads = []
-generated = []
-
-[[outputs]]
-id = "kIj6ihzUTFfFMiZpepEKR"
-uri = "file://README.md"
-type = "text"
-title = "AutoRent — Hilarious README"
